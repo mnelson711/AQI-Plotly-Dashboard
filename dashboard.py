@@ -33,11 +33,39 @@ def update_heatmap(selected_city_file):
 
 
 
+# def serve_layout():
+#     layout = html.Div(children=[
+#         html.H1(children='Air Quality Index (AQI)',className='center-text'),
+#         dcc.Dropdown(
+#         id='city-dropdown',
+#         options=[
+#             {'label': 'Boston', 'value': './csv/aqi_cleaned_Boston.csv'},
+#             {'label': 'New York', 'value': './csv/aqi_cleaned_New_York.csv'},
+#             {'label': 'Los Angeles', 'value': './csv/aqi_cleaned_LA.csv'},
+#             {'label': 'Bakersfield', 'value': './csv/aqi_cleaned_Bakersfield.csv'},
+#             {'label': 'Visalia', 'value': './csv/aqi_cleaned_Visalia.csv'},
+#             {'label': 'Reno', 'value': './csv/aqi_cleaned_Reno.csv'},
+#             {'label': 'Phoenix', 'value': './csv/aqi_cleaned_Phoenix.csv'},
+#             {'label': 'Denver', 'value': './csv/aqi_cleaned_Denver.csv'},
+#         ],
+#         value='./csv/aqi_cleaned_Boston.csv',
+#         className='half-width-dropdown'
+#     ), className='center-text',
+#     dcc.Graph(id='month-year-heatmap')
+#     ], className='app-container')
+#     return layout
+
+
 def serve_layout():
     layout = html.Div(children=[
-        html.H1(children='My Dashboard'),
-        dcc.Dropdown(
-        id='city-dropdown',
+        html.Div(
+            className="app-header",
+            children=[
+                html.Div('United States Air Quality Index', className="app-header--title")
+            ]
+        ),
+        html.Div(dcc.Dropdown(
+            id='city-dropdown',
         options=[
             {'label': 'Boston', 'value': './csv/aqi_cleaned_Boston.csv'},
             {'label': 'New York', 'value': './csv/aqi_cleaned_New_York.csv'},
@@ -48,14 +76,15 @@ def serve_layout():
             {'label': 'Phoenix', 'value': './csv/aqi_cleaned_Phoenix.csv'},
             {'label': 'Denver', 'value': './csv/aqi_cleaned_Denver.csv'},
         ],
-        value='./csv/aqi_cleaned_Boston.csv'  #default
-    ),
-    dcc.Graph(id='month-year-heatmap')
-    ])
+            value='./csv/aqi_cleaned_Boston.csv',  # default value
+            className='half-width-dropdown'
+        ), className='center-text'),
+        dcc.Graph(id='month-year-heatmap', className='month-year-heatmap')
+    ], className='app-container')
+    
     return layout
 
 app.layout = serve_layout
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)
