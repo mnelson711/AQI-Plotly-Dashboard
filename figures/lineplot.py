@@ -15,11 +15,12 @@ def lineplot(data, x_values, y_values, title="Line Plot", x_label="X Axis", y_la
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=x_values, y=y_values, mode='lines', marker=dict(color='blue')))
     fig.update_layout(
-        title=title,
-        xaxis=dict(title=x_label),
-        yaxis=dict(title=y_label),
+        title='AQI Line Plot',
+        xaxis=dict(title='year', color='white', gridcolor='rgba(0,0,0,0)'),
+        yaxis=dict(title='aqi', color='white',gridcolor='rgba(0,0,0,0)'),
         plot_bgcolor='hsla(228, 3%, 35%, 0.971)',
         paper_bgcolor='hsla(228, 3%, 35%, 0.971)',
         font=dict(color='white')
+        # Other layout settings...
     )
     return fig

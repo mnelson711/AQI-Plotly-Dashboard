@@ -72,16 +72,9 @@ def update_output(boston_clicks, ny_clicks, la_clicks, denver_clicks, reno_click
     months = processed_df['Month'].tolist()
     gradient_fig = gradient_heatmap(gradient_data, years, months, title="AQI Gradient Plot")
 
-    line_fig = create_line_chart(processed_df,years,processed_df['aqi'],title='AQI Line Plot')  # Assuming create_line_chart is a function that creates a line chart
+    line_fig = lineplot(processed_df,years,processed_df['aqi'],title='AQI Line Plot')  # Assuming create_line_chart is a function that creates a line chart
     
-    line_fig.update_layout(
-        xaxis=dict(title='year', color='white', gridcolor='rgba(0,0,0,0)'),
-        yaxis=dict(title='aqi', color='white',gridcolor='rgba(0,0,0,0)'),
-        plot_bgcolor='hsla(228, 3%, 35%, 0.971)',
-        paper_bgcolor='hsla(228, 3%, 35%, 0.971)',
-        font=dict(color='white')
-        # Other layout settings...
-    )
+    
 
     return heatmap_fig, gradient_fig, line_fig
 
