@@ -1,19 +1,18 @@
-# components/layout.py
 from dash import html, dcc
-from figures.exampleFig import create_line_chart
-from figures.timeSeriesHeatMap import month_year_heatmap
 import pandas as pd
-import numpy as np
 import calendar
 from dash.dependencies import Input, Output
+import plotly.graph_objects as go
+from figures.exampleFig import create_line_chart
+from figures.timeSeriesHeatMap import month_year_heatmap
 
+# Existing callback to update the heatmap
 @app.callback(
-    Output('heatmap-graph', 'figure'),
+    Output('month-year-heatmap', 'figure'),
     [Input('city-dropdown', 'value')]
 )
 def update_heatmap(selected_city_file):
     # Load and process the dataset for the selected city
-    
     processed_df = pd.read_csv(selected_city_file)
     # Convert 'Year' and 'Month' to string to ensure they are treated as categorical data
     processed_df['Year'] = processed_df['Year'].astype(str)
@@ -25,20 +24,33 @@ def update_heatmap(selected_city_file):
     fig = month_year_heatmap(pivot_df)
     return fig
 
+# New callback to update the line plot
+@app.callback(
+    Output('line-plot', 'figure'),
+    [Input('city-dropdown', 'value')]
+)
+def update_line_plot(selected_city_file):
+    # Load and process the dataset for the selected city
+    processed_df = pd.read_csv(selected_city_file)
+    # Here you can create your line chart using create_line_chart function or any other method you have
+    fig = create_line_chart(processed_df)  # Assuming create_line_chart is a function that creates a line chart
+    return fig
 
-
+# Layout with both the dropdown and the graphs
 def serve_layout():
     layout = html.Div(children=[
         html.H1(children='My Dashboard'),
         dcc.Dropdown(
-        id='city-dropdown',
-        options=[
-            {'label': 'Boston', 'value': 'aqi_cleaned_Boston.csv'},
-            {'label': 'New York', 'value': 'aqi_cleaned_New_York.csv'},
-            # Add more cities as needed
-        ],
-        value='aqi_cleaned_Boston.csv'  # Default value
-    ),
-    dcc.Graph(id='month-year-heatmap')
+            id='city-dropdown',
+            options=[
+                {'label': 'Boston', 'value': 'aqi_cleaned_Boston.csv'},
+                {'label': 'New York', 'value': 'aqi_cleaned_New_York.csv'},
+                # Add more cities as needed
+            ],
+            value='aqi_cleaned_Boston.csv'  # Default value
+        ),
+        dcc.Graph(id='month-year-heatmap'),
+        dcc.Graph(id='line-plot')  # Added graph component for line plot
     ])
     return layout
+
