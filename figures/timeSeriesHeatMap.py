@@ -1,101 +1,23 @@
-# #TO DO
-# # aqi data prep
-# # get value per month, highest AQI value and also average AQI value
-# # add time series heatmap
-# # add gradient heatmap after
-
-# import pandas as pd
-# import plotly.graph_objects as go
-# import numpy as np
-
-# # def month_year_heatmap(df, title='Month-Year Heatmap', colormap='Viridis'):
-# #     fig = go.Figure(data=go.Heatmap(
-# #         z=df.values,
-# #         x=df.columns,
-# #         y=df.index,
-# #         colorscale=colormap + "_r",
-# #         colorbar=dict(title='Magnitude'),
-# #     ))
-
-# #     fig.update_layout(
-# #         title=title,
-# #         xaxis=dict(title='Year', type='category'),
-# #         yaxis=dict(title='Month'),
-# #     )
-    
-# #     return fig  # Return the figure object instead of showing or saving it
-
-# import plotly.graph_objects as go
-
-# custom_colorscale = [
-#     [-1.0, "grey"], #missing values
-#     [0.0, "green"],   # AQI 0
-#     [0.11, "green"],  # AQI 50 - Good
-#     [0.22, "yellowgreen"],  # AQI 100 - Moderate
-#     [0.33, "yellow"], # AQI 150
-#     [0.44, "gold"],   # AQI 200 - Unhealthy for Sensitive Groups
-#     [0.56, "orange"], # AQI 300 - Unhealthy
-#     [1.0, "red"]      # AQI 450 - Hazardous
-# ]
-
-# # Setting tick values and text for colorbar
-tick_values = [0, 50, 100, 150, 200, 300, 450]
-tick_text = ["0 Good", "50 Moderate", "100 Unhealthy for Sensitive Groups", "150 Unhealthy", "200 Very Unhealthy", "300 Hazardous", "450+"]
-
-
-# def month_year_heatmap(df, title='Month-Year Heatmap', colormap=custom_colorscale):
-#     df_filled = df.fillna(-1)
-#     fig = go.Figure(data=go.Heatmap(
-#         z=df_filled.values,
-#         x=df_filled.columns,
-#         y=df_filled.index,
-#         colorscale=colormap,
-#         colorbar=dict(
-#             title='AQI',
-#             titleside='right',
-#             tickmode='array',
-#             tickvals=tick_values,
-#             ticktext=tick_text,
-#             ticks='outside'
-#         ),
-#         # missingcolor="grey",
-#         zmin=-1,  # Minimum value of color scale
-#         zmax=450  # Maximum value of color scale
-#     ))
-
-
-#     fig.update_layout(
-#         title=title,
-#         xaxis=dict(title='Year', type='category'),
-#         yaxis=dict(title='Month', autorange='reversed')
-#     )
-#     return fig
-
-
-
-import pandas as pd
 import plotly.graph_objects as go
-import numpy as np
 
-# Redefine the custom colorscale
-# Colors are set according to the proportionate positions of the AQI thresholds
 custom_colorscale = [
-    [0.0, "grey"],                     # Missing values (-1) at 0% of the scale
-    [(1+0)/451, "green"],              # AQI 0 at ~0.22% of the scale (proportion of 1 in 0 to 450)
-    [(1+50)/451, "green"],             # AQI 50 at 11.31% of the scale
-    [(1+100)/451, "yellowgreen"],      # AQI 100 at 22.39% of the scale
-    [(1+150)/451, "yellow"],           # AQI 150 at 33.48% of the scale
-    [(1+200)/451, "gold"],             # AQI 200 at 44.57% of the scale
-    [(1+300)/451, "orange"],           # AQI 300 at 66.74% of the scale
-    [1.0, "red"]                       # AQI 450 at 100% of the scale
+    [0.0, "grey"],
+    [(1+0)/451, "green"],
+    [(1+50)/451, "green"],
+    [(1+100)/451, "yellowgreen"],
+    [(1+150)/451, "yellow"],
+    [(1+200)/451, "gold"],
+    [(1+300)/451, "orange"],
+    [1.0, "red"]                      
 ]
 
-# # Setting tick values and text for colorbar
-# tick_values = [(-1+1)/451, (50+1)/451, (100+1)/451, (150+1)/451, (200+1)/451, (300+1)/451, 1]
-# tick_text = ["Missing", "Good (50)", "Moderate (100)", "Unhealthy for Sensitive Groups (150)", "Unhealthy (200)", "Very Unhealthy (300)", "Hazardous (450)"]
 
 def month_year_heatmap(df, title='Month-Year Heatmap', colormap=custom_colorscale):
-    df_filled = df.fillna(-1)  # Fill NaNs with -1 for 'missing' category
+    
+    tick_values = [0, 50, 100, 150, 200, 300, 450]
+    tick_text = ["0 Good", "50 Moderate", "100 Unhealthy for Sensitive Groups", "150 Unhealthy", "200 Very Unhealthy", "300 Hazardous", "450+"]
+
+    df_filled = df.fillna(-1)
     fig = go.Figure(data=go.Heatmap(
         z=df_filled.values,
         x=df_filled.columns,
@@ -103,22 +25,94 @@ def month_year_heatmap(df, title='Month-Year Heatmap', colormap=custom_colorscal
         colorscale=colormap,
         colorbar=dict(
             title='AQI',
+            title_font_color='white',
             titleside='top',
             tickmode='array',
             tickvals=tick_values,
             ticktext=tick_text,
-            ticks='outside'
+            tickcolor='white',
+            ticks='inside',
+            tickfont=dict(color='white'),
         ),
-        zmin=-1,  # Minimum value of color scale
-        zmax=450  # Maximum value of color scale
+        zmin=-1,
+        zmax=450
     ))
 
     fig.update_layout(
         title=title,
-        xaxis=dict(title='Year', type='category'),
-        yaxis=dict(title='Month', autorange='reversed'),
-        plot_bgcolor='rgba(0,0,0,0)',  # Makes plot background transparent
-        # paper_bgcolor='#F4F4F8'
+        title_font_color='white',
+        xaxis=dict(title='Year', type='category',title_font=dict(color='white'),
+        tickfont=dict(color='white'),
+        tickcolor='green'),
+        yaxis=dict(title='Month', autorange='reversed', title_font=dict(color='white'),
+        tickfont=dict(color='white'),
+        tickcolor='white'),
+        plot_bgcolor='hsla(228, 3%, 35%, 0.971)',
+        paper_bgcolor='hsla(228, 3%, 35%, 0.971)',
+        height=400,
     )
 
+    return fig
+
+def gradient_heatmap(data, years, months, colormap=custom_colorscale, title="Data Visualization", x_label="Years"):
+    x_data = list(range(len(data)))
+    y_data = [1] * len(data)
+    
+    categories = []
+    for value in data:
+        if value <= 50:
+            category = 'Good'
+        elif value <= 100:
+            category = 'Moderate'
+        elif value <= 150:
+            category = 'Unhealthy for Sensitive Groups'
+        elif value <= 200:
+            category = 'Unhealthy'
+        elif value <= 300:
+            category = 'Very Unhealthy'
+        else:
+            category = 'Hazardous'
+        categories.append(category)
+
+    hover_texts = [
+        f"Month: {month}<br>Year: {year}<br>AQI: {value}<br>Category: {category}"
+        for month, year, value, category in zip(months, years, data, categories)
+    ]
+
+    fig = go.Figure(data=go.Bar(
+        x=x_data,
+        y=y_data,
+        text=hover_texts,
+        hoverinfo="text",
+        marker=dict(
+            color=data,
+            colorscale=colormap,
+            line=dict(color='rgba(255,255,255,0)'),
+        ),
+        width=1.1,
+    ))
+    first_year, last_year = years[0], years[-1]
+    fig.update_layout(
+        xaxis=dict(
+            title=x_label,
+            title_font_color='white',
+            tickmode='array',
+            tickvals=[5, len(years) - 5],
+            ticktext=[first_year, last_year],
+            title_font=dict(color='white'),
+            tickfont=dict(color='white'),
+            tickcolor='white'
+        ),
+        yaxis=dict(
+            showticklabels=False,
+            title="",
+        ),
+        title=title,
+        title_font_color='white',
+        plot_bgcolor='hsla(228, 3%, 35%, 0.971)',
+        paper_bgcolor='hsla(228, 3%, 35%, 0.971)',
+        margin=dict(l=40, r=40, t=40, b=40),
+        height=250
+    )
+    
     return fig
