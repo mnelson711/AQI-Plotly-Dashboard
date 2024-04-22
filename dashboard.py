@@ -4,6 +4,8 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 import calendar
 from figures.timeSeriesHeatMap import month_year_heatmap, gradient_heatmap
+from figures.lineplot import lineplot
+from figures.exampleFig import create_line_chart
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.SLATE])
 
@@ -36,7 +38,7 @@ def aqi_info_modal():
     ])
 
 @app.callback(
-    [Output('month-year-heatmap', 'figure'), Output('gradient-bar-plot', 'figure')],
+    [Output('month-year-heatmap', 'figure'), Output('gradient-bar-plot', 'figure'), Output('line-plot', 'figure')],
     [Input('Boston', 'n_clicks'),
      Input('New_York', 'n_clicks'),
      Input('Los_Angeles', 'n_clicks'),
@@ -47,12 +49,11 @@ def aqi_info_modal():
      Input('Visalia', 'n_clicks'),
      ]
 )
-
 def update_output(boston_clicks, ny_clicks, la_clicks, denver_clicks, reno_clicks, visalia_clicks, phoenix_clicks, bakersfield_clicks):
     ctx = callback_context
 
     if not ctx.triggered:
-        selected_city_file = './csv/aqi_cleaned_Boston.csv' #default ot boston
+        selected_city_file = './csv/aqi_cleaned_Boston.csv' #default to boston
     else:
         button_id = ctx.triggered[0]['prop_id'].split('.')[0]
         selected_city_file = f'./csv/aqi_cleaned_{button_id}.csv'
@@ -63,7 +64,7 @@ def update_output(boston_clicks, ny_clicks, la_clicks, denver_clicks, reno_click
     month_order = [calendar.month_name[i] for i in range(1, 13)]
     processed_df['Month'] = pd.Categorical(processed_df['Month'], categories=month_order, ordered=True)
     
-    pivot_df = processed_df.pivot("Month", "Year", "aqi")
+    pivot_df = processed_df.pivot(index="Month", columns="Year", values="aqi")
     heatmap_fig = month_year_heatmap(pivot_df)
 
     gradient_data = processed_df['aqi'].tolist()
@@ -71,7 +72,18 @@ def update_output(boston_clicks, ny_clicks, la_clicks, denver_clicks, reno_click
     months = processed_df['Month'].tolist()
     gradient_fig = gradient_heatmap(gradient_data, years, months, title="AQI Gradient Plot")
 
-    return heatmap_fig, gradient_fig
+    line_fig = create_line_chart(processed_df,years,processed_df['aqi'],title='AQI Line Plot')  # Assuming create_line_chart is a function that creates a line chart
+    
+    line_fig.update_layout(
+        xaxis=dict(title='year', color='white', gridcolor='rgba(0,0,0,0)'),
+        yaxis=dict(title='aqi', color='white',gridcolor='rgba(0,0,0,0)'),
+        plot_bgcolor='hsla(228, 3%, 35%, 0.971)',
+        paper_bgcolor='hsla(228, 3%, 35%, 0.971)',
+        font=dict(color='white')
+        # Other layout settings...
+    )
+
+    return heatmap_fig, gradient_fig, line_fig
 
 @app.callback(
     Output("modal", "is_open"),
@@ -117,6 +129,9 @@ def serve_layout():
             ]),
             dbc.Row([
                 dbc.Col(dcc.Graph(id='gradient-bar-plot',className='plot-container'), width=12)
+            ]),
+            dbc.Row([
+                dbc.Col(dcc.Graph(id='line-plot', className='plot-container'), width=12)
             ]),
             
         ],
