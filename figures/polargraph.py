@@ -1,52 +1,70 @@
 import pandas as pd
-import plotly.graph_objects as go
 import numpy as np
 import calendar
+import plotly.graph_objects as go
 
-def plot_polar_avg_aqi(csv_files, city_names):
-    avg_aqi_by_month = {calendar.month_name[i]: [] for i in range(1, 13)}
-    traces = []
+def polarchart(csv_file, city_name):
+    df = pd.read_csv(csv_file)
 
-    for file, city in zip(csv_files, city_names):
-        df = pd.read_csv(file)
-        df['Month'] = df['Month'].apply(lambda x: calendar.month_name[int(x)])
-        avg_aqi_monthly = df.groupby('Month')['aqi'].mean().reset_index()
-        for index, row in avg_aqi_monthly.iterrows():
-            avg_aqi_by_month[row['Month']].append(row['aqi'])
+    df['Month'] = df['Month'].apply(lambda x: calendar.month_name[int(x)])
 
-        avg_aqi_overall = [np.mean(avg_aqi_by_month[calendar.month_name[i]]) for i in range(1, 13)]
-        avg_aqi_overall_reordered = avg_aqi_overall[6:] + avg_aqi_overall[:6]
+    filtered_data = {}
+    for month in calendar.month_name[1:]:
+        monthly_data = df[df['Month'] == month]['aqi']
+        filtered_data[month] = monthly_data[monthly_data > 100].tolist()
 
-        theta = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360]
+    r_values = []
+    theta_values = []
 
-        traces.append(go.Scatterpolar(
-            r=avg_aqi_overall_reordered,
-            theta=theta,
-            mode='markers',
-            name=city,  
-            marker=dict(
-                size=8, 
-                symbol='circle'
-            )
-        ))
+    for month, aqi_values in filtered_data.items():
+        for aqi in aqi_values:
+            r_values.append(aqi)
+            theta_values.append(list(calendar.month_name[1:]).index(month) * (360 / 12))  
 
-    fig = go.Figure(data=traces)
+    trace = go.Scatterpolar(
+        r=r_values,
+        theta=theta_values,
+        mode='markers',
+        name=city_name,
+        marker=dict(
+            size=10,
+            symbol='circle',
+            color='red'  
+        )
+    )
+
+    fig = go.Figure(data=[trace])
 
     fig.update_layout(
         polar=dict(
             radialaxis=dict(
                 visible=True,
-                range=[0, max([val for sublist in avg_aqi_by_month.values() for val in sublist])]
+                range=[0, max(r_values) + 10],  
+                tickfont=dict(
+                    size=10,  
+                    color='grey'  
+                )
             ),
             angularaxis=dict(
                 tickmode='array',
                 tickvals=np.linspace(0, 360, 12, endpoint=False),
-                ticktext=list(calendar.month_name)[1:] 
-            )
+                ticktext=list(calendar.month_name)[1:],
+                tickfont=dict(
+                    size=12,  
+                    color='black'  
+                )
+            ),
+            bgcolor='lightblue' 
         ),
-        title='Average AQI by Month',
-        showlegend=True  
+        title=f'Average AQI by Month (values > 100) - {city_name}',
+        title_font=dict(
+            size=16,  
+            color='black'  
+        ),
+        showlegend=False,
+        margin=dict(l=40, r=40, t=80, b=40),  
     )
 
     return fig
+
 
