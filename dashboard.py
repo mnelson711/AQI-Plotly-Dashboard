@@ -2,12 +2,29 @@ from dash import Dash, dcc, html, callback_context
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import pandas as pd
+import plotly.graph_objs as go
 import calendar
 from figures.timeSeriesHeatMap import month_year_heatmap, gradient_heatmap
 from figures.lineplot import lineplot
 from figures.exampleFig import create_line_chart
+from figures.spatialHeatMap import generate_heatmap
+from datetime import datetime
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.SLATE])
+
+spatial_df = pd.read_csv('./csv/AQI_combined.csv')
+spatial_df['Date Local'] = pd.to_datetime(spatial_df['Date Local'])
+unique_dates = pd.to_datetime(spatial_df['Date Local']).dt.date.unique()
+
+# Convert the date objects to strings
+date_strings = [str(date) for date in unique_dates]
+
+# Convert the date strings to datetime objects
+date_objects = [datetime.strptime(date, '%Y-%m-%d').date() for date in date_strings]
+date_objects.sort()
+
+slider_marks = {i: {'label': str(date), 'style': {'writing-mode': 'vertical-lr'}} for i, date in enumerate(date_objects)}
+
 
 def aqi_info_modal():
     return html.Div([
@@ -36,6 +53,49 @@ def aqi_info_modal():
             is_open=False,
         ),
     ])
+
+def generate_spatial_heatmap(selected_date):
+    selected_date = date_objects[selected_date]
+    print("length of spatial df: " + str(len(spatial_df)))
+    print("selected date: " + str(selected_date))
+    filtered_data = spatial_df[spatial_df['Date Local'] == str(selected_date)]
+    print("length of df: " + str(len(filtered_data)))
+    fig = go.Figure(go.Scattermapbox(
+        lat=filtered_data['Latitude'],
+        lon=filtered_data['Longitude'],
+        mode='markers',
+        marker=dict(
+            size=10,
+            color=filtered_data['Ozone'],
+            colorscale='Viridis',  # Choose a suitable colorscale
+            cmin=filtered_data['Ozone'].min(),
+            cmax=filtered_data['Ozone'].max(),
+            colorbar=dict(title='Ozone Value')
+        )
+    ))
+
+    fig.update_layout(
+        mapbox_style="carto-positron",
+        mapbox_zoom=3,
+        mapbox_center={"lat": 37.0902, "lon": -95.7129},
+    )
+
+    return fig
+
+@app.callback(
+    Output('spatial-heatmap', 'figure'),
+    [Input('date-slider', 'value')]  # Assuming you have a slider for selecting dates
+)
+def update_spatial_heatmap(selected_date):
+    return generate_spatial_heatmap(selected_date)
+
+# @app.callback(
+#     Output('selected-date-label', 'children'),
+#     [Input('date-slider', 'value')]
+# )
+# def update_date_label(slider_value):
+#     selected_date = date_objects[slider_value]  # Retrieve the date from date_objects using the slider value
+#     return f"Selected Date: {selected_date.strftime('%Y-%m-%d')}"
 
 @app.callback(
     [Output('month-year-heatmap', 'figure'), Output('gradient-bar-plot', 'figure'), Output('line-plot', 'figure')],
@@ -74,8 +134,6 @@ def update_output(boston_clicks, ny_clicks, la_clicks, denver_clicks, reno_click
 
     line_fig = lineplot(processed_df,years,processed_df['aqi'],title='AQI Line Plot')  # Assuming create_line_chart is a function that creates a line chart
     
-    
-
     return heatmap_fig, gradient_fig, line_fig
 
 @app.callback(
@@ -97,6 +155,32 @@ def serve_layout():
             dbc.Row([
                 dbc.Col(aqi_info_modal(), className="aqi-modal",width={'size': 6, 'offset': 3})
             ]),
+            dbc.Row([
+                dbc.Col(html.H4('Spatial Heatmap', className="text-center mb-4"), width=12)
+            ]),
+            dbc.Row([
+                dbc.Col(dcc.Graph(id='spatial-heatmap',className='plot-container'), width=12)
+            ]),
+            # dbc.Row(
+            #     dbc.Col(
+            #         html.Div(id='selected-date-label', className='text-center'),
+            #         width=12
+            #     )
+            # ),
+            dbc.Row(
+                dbc.Col(
+                    dcc.Slider(
+                        id='date-slider',
+                        min=0,
+                        max=len(date_objects) - 1,
+                        value=0,  # Initial value
+                        marks=slider_marks,
+                        step=1
+                    ),
+                    className="slider",
+                    width={'size': 6, 'offset': 3}
+                )
+            ),
             dbc.Row(
                 dbc.Col(
                     dbc.DropdownMenu(
