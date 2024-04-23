@@ -12,7 +12,7 @@ from datetime import datetime
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.SLATE])
 
-spatial_df = pd.read_csv('./csv/AQI_combined.csv')
+spatial_df = pd.read_csv('./csv/AQI_after_2020_before_2023.csv')
 spatial_df['Date Local'] = pd.to_datetime(spatial_df['Date Local'])
 unique_dates = pd.to_datetime(spatial_df['Date Local']).dt.date.unique()
 
@@ -67,7 +67,7 @@ def generate_spatial_heatmap(selected_date):
         marker=dict(
             size=10,
             color=filtered_data['Ozone'],
-            colorscale='Viridis',  # Choose a suitable colorscale
+            colorscale='Viridis',  
             cmin=filtered_data['Ozone'].min(),
             cmax=filtered_data['Ozone'].max(),
             colorbar=dict(title='Ozone Value')
@@ -89,13 +89,13 @@ def generate_spatial_heatmap(selected_date):
 def update_spatial_heatmap(selected_date):
     return generate_spatial_heatmap(selected_date)
 
-# @app.callback(
-#     Output('selected-date-label', 'children'),
-#     [Input('date-slider', 'value')]
-# )
-# def update_date_label(slider_value):
-#     selected_date = date_objects[slider_value]  # Retrieve the date from date_objects using the slider value
-#     return f"Selected Date: {selected_date.strftime('%Y-%m-%d')}"
+@app.callback(
+    Output('selected-date-label', 'children'),
+    [Input('date-slider', 'value')]
+)
+def update_date_label(slider_value):
+    selected_date = date_objects[slider_value]  # Retrieve the date from date_objects using the slider value
+    return f"Selected Date: {selected_date.strftime('%Y-%m-%d')}"
 
 @app.callback(
     [Output('month-year-heatmap', 'figure'), Output('gradient-bar-plot', 'figure'), Output('line-plot', 'figure')],
@@ -161,12 +161,12 @@ def serve_layout():
             dbc.Row([
                 dbc.Col(dcc.Graph(id='spatial-heatmap',className='plot-container'), width=12)
             ]),
-            # dbc.Row(
-            #     dbc.Col(
-            #         html.Div(id='selected-date-label', className='text-center'),
-            #         width=12
-            #     )
-            # ),
+            dbc.Row(
+                dbc.Col(
+                    html.Div(id='selected-date-label', className='text-center'),
+                    width=12
+                )
+            ),
             dbc.Row(
                 dbc.Col(
                     dcc.Slider(
