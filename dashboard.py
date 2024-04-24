@@ -6,6 +6,7 @@ import plotly.graph_objs as go
 import calendar
 from figures.timeSeriesHeatMap import month_year_heatmap, gradient_heatmap
 from figures.lineplot import lineplot
+from figures.polargraph import polarchart
 from figures.exampleFig import create_line_chart
 from figures.spatialHeatMap import generate_heatmap
 from datetime import datetime
@@ -98,7 +99,7 @@ def update_date_label(slider_value):
     return f"Selected Date: {selected_date.strftime('%Y-%m-%d')}"
 
 @app.callback(
-    [Output('month-year-heatmap', 'figure'), Output('gradient-bar-plot', 'figure'), Output('line-plot', 'figure')],
+    [Output('month-year-heatmap', 'figure'), Output('gradient-bar-plot', 'figure'), Output('line-plot', 'figure'), Output('polar-plot', 'figure')],
     [Input('Boston', 'n_clicks'),
      Input('New_York', 'n_clicks'),
      Input('Los_Angeles', 'n_clicks'),
@@ -133,8 +134,9 @@ def update_output(boston_clicks, ny_clicks, la_clicks, denver_clicks, reno_click
     gradient_fig = gradient_heatmap(gradient_data, years, months, title="AQI Gradient Plot")
 
     line_fig = lineplot(processed_df,years,processed_df['aqi'],title='AQI Line Plot')  # Assuming create_line_chart is a function that creates a line chart
-    
-    return heatmap_fig, gradient_fig, line_fig
+    polar_fig = polarchart(selected_city_file)
+
+    return heatmap_fig, gradient_fig, line_fig, polar_fig
 
 @app.callback(
     Output("modal", "is_open"),
@@ -210,7 +212,9 @@ def serve_layout():
             dbc.Row([
                 dbc.Col(dcc.Graph(id='line-plot', className='plot-container'), width=12)
             ]),
-            
+            dbc.Row([
+                dbc.Col(dcc.Graph(id='polar-plot', className='plot-container'), width=12)
+            ]),
         ],
         fluid=True,
         className='py-3'
