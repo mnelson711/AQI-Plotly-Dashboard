@@ -7,14 +7,15 @@ def polarchart(csv_file):
     df = pd.read_csv(csv_file)
     print(csv_file)
 
-    if (csv_file == './csv/aqi_cleaned_Los_Angeles.csv'):
-        csv_file = './csv/aqi_cleaned_LA.csv'
 
     parts = csv_file.split('_')
     city_name = parts[2].replace('.csv', '')
     if(city_name == 'New'):
         city_name = city_name + ' York'
     print(city_name)
+
+    if(city_name == 'Los'):
+        city_name = city_name + ' Angeles'
 
     df['Month'] = df['Month'].apply(lambda x: calendar.month_name[int(x)])
 
