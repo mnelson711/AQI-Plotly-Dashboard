@@ -3,8 +3,18 @@ import numpy as np
 import calendar
 import plotly.graph_objects as go
 
-def polarchart(csv_file, city_name):
+def polarchart(csv_file):
     df = pd.read_csv(csv_file)
+    print(csv_file)
+
+    if (csv_file == './csv/aqi_cleaned_Los_Angeles.csv'):
+        csv_file = './csv/aqi_cleaned_LA.csv'
+
+    parts = csv_file.split('_')
+    city_name = parts[2].replace('.csv', '')
+    if(city_name == 'New'):
+        city_name = city_name + ' York'
+    print(city_name)
 
     df['Month'] = df['Month'].apply(lambda x: calendar.month_name[int(x)])
 
@@ -39,7 +49,7 @@ def polarchart(csv_file, city_name):
         polar=dict(
             radialaxis=dict(
                 visible=True,
-                range=[0, max(r_values) + 10],  
+                range=[0, max(r_values) + 10] if r_values else [0, 100],  
                 tickfont=dict(
                     size=10,  
                     color='grey'  
@@ -51,18 +61,23 @@ def polarchart(csv_file, city_name):
                 ticktext=list(calendar.month_name)[1:],
                 tickfont=dict(
                     size=12,  
-                    color='black'  
+                    color='white'  
                 )
             ),
             bgcolor='lightblue' 
         ),
-        title=f'Average AQI by Month (values > 100) - {city_name}',
+        title=f'AQI values over 100  - {city_name}',
         title_font=dict(
             size=16,  
-            color='black'  
+            color='white'  
         ),
-        showlegend=False,
+        showlegend=True,
+         legend=dict(
+        title_font=dict(color='red'),  
+        font=dict(color='white')  
+        ),
         margin=dict(l=40, r=40, t=80, b=40),  
+        paper_bgcolor='hsla(228, 3%, 35%, 0.971)',
     )
 
     return fig
