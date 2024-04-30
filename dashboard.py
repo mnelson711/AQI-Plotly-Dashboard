@@ -24,8 +24,15 @@ date_strings = [str(date) for date in unique_dates]
 date_objects = [datetime.strptime(date, '%Y-%m-%d').date() for date in date_strings]
 date_objects.sort()
 
-slider_marks = {i: {'label': str(date), 'style': {'writing-mode': 'vertical-lr'}} for i, date in enumerate(date_objects)}
-
+slider_marks = {
+    i: {
+        'label': date.strftime('%m-%d') if i % 100 == 0 else '',
+        'style': {
+            'transform': 'rotate(-45deg)',
+            'white-space': 'nowrap'
+        }
+    } for i, date in enumerate(date_objects)
+}
 
 def aqi_info_modal():
     return html.Div([
@@ -56,11 +63,18 @@ def aqi_info_modal():
     ])
 
 def generate_spatial_heatmap(selected_date):
+    custom_colorscale = [
+        [0.0, "grey"],
+        [(1+0)/451, "green"],
+        [(1+50)/451, "green"],
+        [(1+100)/451, "yellowgreen"],
+        [(1+150)/451, "yellow"],
+        [(1+200)/451, "gold"],
+        [(1+300)/451, "orange"],
+        [1.0, "red"]                      
+    ]
     selected_date = date_objects[selected_date]
-    print("length of spatial df: " + str(len(spatial_df)))
-    print("selected date: " + str(selected_date))
     filtered_data = spatial_df[spatial_df['Date Local'] == str(selected_date)]
-    print("length of df: " + str(len(filtered_data)))
     fig = go.Figure(go.Scattermapbox(
         lat=filtered_data['Latitude'],
         lon=filtered_data['Longitude'],
@@ -68,10 +82,10 @@ def generate_spatial_heatmap(selected_date):
         marker=dict(
             size=10,
             color=filtered_data['Ozone'],
-            colorscale='Viridis',  
+            colorscale= custom_colorscale,  
             cmin=filtered_data['Ozone'].min(),
             cmax=filtered_data['Ozone'].max(),
-            colorbar=dict(title='Ozone Value')
+            colorbar=dict(title='Ozone Value'),
         )
     ))
 
@@ -79,6 +93,12 @@ def generate_spatial_heatmap(selected_date):
         mapbox_style="carto-positron",
         mapbox_zoom=3,
         mapbox_center={"lat": 37.0902, "lon": -95.7129},
+        plot_bgcolor='hsla(228, 3%, 35%, 0.971)',
+        paper_bgcolor='hsla(228, 3%, 35%, 0.971)',
+        margin=dict(l=40, r=40, t=40, b=40),
+        font=dict(
+            color='white'
+        )
     )
 
     return fig
@@ -176,7 +196,7 @@ def serve_layout():
                         min=0,
                         max=len(date_objects) - 1,
                         value=0,  # Initial value
-                        marks=slider_marks,
+                        marks=None,
                         step=1
                     ),
                     className="slider",

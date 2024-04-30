@@ -1,13 +1,13 @@
 import plotly.express as px
 
 
+
 def generate_heatmap(df):
     fig = px.scatter_mapbox(
         df,
         lat="latitude",
         lon="longitude",
         color="aqi",
-        color_continuous_scale=px.colors.sequential.Viridis,
         hover_name="location_name",
         size_max=15,
         zoom=3,
