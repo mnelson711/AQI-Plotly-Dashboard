@@ -13,7 +13,7 @@ custom_colorscale = [
 
 def lineplot(data, x_values, y_values, title="Line Plot", x_label="X Axis", y_label="Y Axis"):
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=x_values, y=y_values, mode='lines', marker=dict(color='blue')))
+    fig.add_trace(go.Scatter(x=x_values, y=y_values, mode='lines', marker=dict(color='lightblue')))
     fig.update_layout(
         title='AQI Line Plot',
         xaxis=dict(title='year', color='white', gridcolor='rgba(0,0,0,0)'),
