@@ -11,6 +11,8 @@ from figures.spatialHeatMap import generate_heatmap
 from datetime import datetime
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.SLATE])
+app.title = 'AQI Dashboard'
+app._favicon = ("favicon.jpeg")
 
 spatial_df = pd.read_csv('./csv/AQI_after_2020_before_2023.csv')
 spatial_df['Date Local'] = pd.to_datetime(spatial_df['Date Local'])
