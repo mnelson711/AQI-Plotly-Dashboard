@@ -3,16 +3,15 @@ import numpy as np
 import calendar
 import plotly.graph_objects as go
 
-def polarchart(csv_file):
+def polarchart(csv_file, city_name):
     df = pd.read_csv(csv_file)
-    print(csv_file)
 
 
-    parts = csv_file.split('_')
-    city_name = parts[2].replace('.csv', '')
-    if(city_name == 'New'):
-        city_name = city_name + ' York'
-    print(city_name)
+    # parts = csv_file.split('_')
+    # city_name = parts[2].replace('.csv', '')
+    # if(city_name == 'New'):
+    #     city_name = city_name + ' York'
+    # print(city_name)
 
     if(city_name == 'Los'):
         city_name = city_name + ' Angeles'

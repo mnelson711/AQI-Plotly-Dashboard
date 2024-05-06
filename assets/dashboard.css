@@ -13,9 +13,10 @@
     text-align: center;
 }
 
-.app-container {
+.container {
     font-family: Helvetica, sans-serif;
-    background-color: #767B91;
+    /* background-color: #767B91; */
+    padding: "5%"
 }
 
 .month-year-heatmap {
@@ -41,10 +42,10 @@
 
 
 .plot-container {
-    border-radius: "2%";
+    border-radius: "50px";
     /* border: solid; */
     /* Rounded corners */
-    overflow: hidden;
+    overflow: auto;
     /* Ensures the corners appear rounded by cutting off external parts */
     /* border: 1px solid #ccc; */
     /* Optional: adds border around the plot */
@@ -52,5 +53,20 @@
     /* Light grey background */
     /* height: 1000; */
     margin-bottom: 1%;
-    margin-inline: 2.5%;
+    /* margin-inline: 2.5%; */
+}
+
+.plot-container-horizontal {
+    border-radius: "50px";
+    /* border: solid; */
+    /* Rounded corners */
+    overflow: auto;
+    /* Ensures the corners appear rounded by cutting off external parts */
+    /* border: 1px solid #ccc; */
+    /* Optional: adds border around the plot */
+    background-color: hsla(228, 3%, 35%, 0.971);
+    /* Light grey background */
+    /* height: 1000; */
+    margin-bottom: 1%;
+    /* margin-inline: 2.5%; */
 }

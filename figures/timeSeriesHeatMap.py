@@ -1,27 +1,51 @@
 import plotly.graph_objects as go
 
+#I made a custom colormap here that better reflects the AQI categories
 custom_colorscale = [
     [0.0, "grey"],
     [(1+0)/451, "green"],
     [(1+50)/451, "green"],
     [(1+100)/451, "yellowgreen"],
-    [(1+150)/451, "yellow"],
-    [(1+200)/451, "gold"],
-    [(1+300)/451, "orange"],
+    [(1+150)/451, "gold"],
+    [(1+200)/451, "orange"],
+    [(1+300)/451, "orangered"],
     [1.0, "red"]                      
 ]
 
 
-def month_year_heatmap(df, title='Month-Year Heatmap', colormap=custom_colorscale):
+def month_year_heatmap(df, data, years, months, cityname, colormap=custom_colorscale):
+    
+    categories = []
+    for value in data:
+        if value <= 50:
+            category = 'Good'
+        elif value <= 100:
+            category = 'Moderate'
+        elif value <= 150:
+            category = 'Unhealthy for Sensitive Groups'
+        elif value <= 200:
+            category = 'Unhealthy'
+        elif value <= 300:
+            category = 'Very Unhealthy'
+        else:
+            category = 'Hazardous'
+        categories.append(category)
     
     tick_values = [0, 50, 100, 150, 200, 300, 450]
     tick_text = ["0 Good", "50 Moderate", "100 Unhealthy for Sensitive Groups", "150 Unhealthy", "200 Very Unhealthy", "300 Hazardous", "450+"]
-
+    
     df_filled = df.fillna(-1)
+    # hover_texts = [
+    #     [f"Month: {month}<br>Year: {year}<br>AQI: {value}<br>Category: {category}" for month, year, value, category in zip(months, years, row, categories)]
+    #     for row in df_filled.values
+    # ]
+
     fig = go.Figure(data=go.Heatmap(
         z=df_filled.values,
         x=df_filled.columns,
         y=df_filled.index,
+        # text="AQI: ",
+        hoverinfo= "z",
         colorscale=colormap,
         colorbar=dict(
             title='AQI',
@@ -39,8 +63,6 @@ def month_year_heatmap(df, title='Month-Year Heatmap', colormap=custom_colorscal
     ))
 
     fig.update_layout(
-        title=title,
-        title_font_color='white',
         xaxis=dict(title='Year', type='category',title_font=dict(color='white'),
         tickfont=dict(color='white'),
         tickcolor='green'),
@@ -49,12 +71,14 @@ def month_year_heatmap(df, title='Month-Year Heatmap', colormap=custom_colorscal
         tickcolor='white'),
         plot_bgcolor='hsla(228, 3%, 35%, 0.971)',
         paper_bgcolor='hsla(228, 3%, 35%, 0.971)',
-        height=400,
+        # height=400,
+        title='City: ' + cityname,
+        title_font_color='white',
     )
 
     return fig
 
-def gradient_heatmap(data, years, months, colormap=custom_colorscale, title="Data Visualization", x_label="Years"):
+def gradient_heatmap(data, years, months, cityname, colormap=custom_colorscale, x_label="Years"):
     x_data = list(range(len(data)))
     y_data = [1] * len(data)
     
@@ -107,7 +131,7 @@ def gradient_heatmap(data, years, months, colormap=custom_colorscale, title="Dat
             showticklabels=False,
             title="",
         ),
-        title=title,
+        title="City: " + cityname,
         title_font_color='white',
         plot_bgcolor='hsla(228, 3%, 35%, 0.971)',
         paper_bgcolor='hsla(228, 3%, 35%, 0.971)',

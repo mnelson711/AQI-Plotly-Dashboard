@@ -7,7 +7,6 @@ import calendar
 from figures.timeSeriesHeatMap import month_year_heatmap, gradient_heatmap
 from figures.lineplot import lineplot
 from figures.polargraph import polarchart
-from figures.exampleFig import create_line_chart
 from figures.spatialHeatMap import generate_heatmap
 from datetime import datetime
 
@@ -16,23 +15,20 @@ app = Dash(__name__, external_stylesheets=[dbc.themes.SLATE])
 spatial_df = pd.read_csv('./csv/AQI_after_2020_before_2023.csv')
 spatial_df['Date Local'] = pd.to_datetime(spatial_df['Date Local'])
 unique_dates = pd.to_datetime(spatial_df['Date Local']).dt.date.unique()
-
-# Convert the date objects to strings
 date_strings = [str(date) for date in unique_dates]
 
-# Convert the date strings to datetime objects
 date_objects = [datetime.strptime(date, '%Y-%m-%d').date() for date in date_strings]
 date_objects.sort()
 
-slider_marks = {
-    i: {
-        'label': date.strftime('%m-%d') if i % 100 == 0 else '',
-        'style': {
-            'transform': 'rotate(-45deg)',
-            'white-space': 'nowrap'
-        }
-    } for i, date in enumerate(date_objects)
-}
+# slider_marks = {
+#     i: {
+#         'label': date.strftime('%m-%d') if i % 100 == 0 else '',
+#         'style': {
+#             'transform': 'rotate(-45deg)',
+#             'white-space': 'nowrap'
+#         }
+#     } for i, date in enumerate(date_objects)
+# }
 
 def aqi_info_modal():
     return html.Div([
@@ -138,6 +134,14 @@ def update_output(boston_clicks, ny_clicks, la_clicks, denver_clicks, reno_click
     else:
         button_id = ctx.triggered[0]['prop_id'].split('.')[0]
         selected_city_file = f'./csv/aqi_cleaned_{button_id}.csv'
+        
+    parts = selected_city_file.split('_')
+    city_name = parts[2].replace('.csv', '')
+    if(city_name == 'New'):
+        city_name = city_name + ' York'
+
+    if(city_name == 'Los'):
+        city_name = city_name + ' Angeles'
 
     processed_df = pd.read_csv(selected_city_file)
     processed_df['Year'] = processed_df['Year'].astype(str)
@@ -146,15 +150,15 @@ def update_output(boston_clicks, ny_clicks, la_clicks, denver_clicks, reno_click
     processed_df['Month'] = pd.Categorical(processed_df['Month'], categories=month_order, ordered=True)
     
     pivot_df = processed_df.pivot(index="Month", columns="Year", values="aqi")
-    heatmap_fig = month_year_heatmap(pivot_df)
-
     gradient_data = processed_df['aqi'].tolist()
     years = processed_df['Year'].tolist()
     months = processed_df['Month'].tolist()
-    gradient_fig = gradient_heatmap(gradient_data, years, months, title="AQI Gradient Plot")
+    
+    heatmap_fig = month_year_heatmap(pivot_df,gradient_data, years, months, city_name)
+    gradient_fig = gradient_heatmap(gradient_data, years, months, city_name)
 
-    line_fig = lineplot(processed_df,years,processed_df['aqi'],title='AQI Line Plot')  # Assuming create_line_chart is a function that creates a line chart
-    polar_fig = polarchart(selected_city_file)
+    line_fig = lineplot(processed_df,years,processed_df['aqi'],title='Line Plot - ' + city_name)  # Assuming create_line_chart is a function that creates a line chart
+    polar_fig = polarchart(selected_city_file, city_name)
 
     return heatmap_fig, gradient_fig, line_fig, polar_fig
 
@@ -224,20 +228,27 @@ def serve_layout():
                 )
             ),
             dbc.Row([
+                dbc.Col(html.H4('Month-Year Heatmap', className="text-center mb-4"), width=12)
+            ]),
+            dbc.Row([
                 dbc.Col(dcc.Graph(id='month-year-heatmap',className='plot-container'), width=12)
+            ]),
+            dbc.Row([
+                dbc.Col(html.H4('Gradient Heatmap', className="text-center mb-4"), width=12)
             ]),
             dbc.Row([
                 dbc.Col(dcc.Graph(id='gradient-bar-plot',className='plot-container'), width=12)
             ]),
             dbc.Row([
-                dbc.Col(dcc.Graph(id='line-plot', className='plot-container'), width=12)
+                dbc.Col(html.H4('Other Plots', className="text-center mb-4"), width=12)
             ]),
             dbc.Row([
-                dbc.Col(dcc.Graph(id='polar-plot', className='plot-container'), width=12)
-            ]),
+                dbc.Col(dcc.Graph(id='line-plot', className='plot-container-horizontal'), width=6),
+                dbc.Col(dcc.Graph(id='polar-plot', className='plot-container-horizontal'), width=6)
+            ])
         ],
         fluid=True,
-        className='py-3'
+        className='container'
     )
 
 app.layout = serve_layout
